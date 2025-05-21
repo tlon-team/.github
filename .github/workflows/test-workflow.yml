@@ -1,0 +1,11 @@
+on:
+  push: # Triggers on push to this .github repo
+    branches:
+      - main # Or your default branch
+
+jobs:
+  test_push_trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo message
+        run: echo "Workflow in .github repo triggered by push!"
