@@ -6,14 +6,16 @@ on:
 
 env:
   PROJECT_URL: "https://github.com/orgs/tlon-team/projects/9"
+  PROJECT_NUMBER: "9" # Corresponds to project 9
 
-# Permissions for the GITHUB_TOKEN
+# Permissions for the GITHUB_TOKEN used by the workflow runner itself
 permissions:
-  issues: read
-  projects: write      # This is the syntactically correct scope
+  issues: read # Required to access issue details like github.event.issue.html_url from the event payload.
+               # Project write permissions will be provided by the PAT (ORG_PAT_PROJECTS) below.
 
 jobs:
   add_issue_to_project:
+    name: Add issue to Tlon Org Project
     if: github.repository_owner == 'tlon-team'
     runs-on: ubuntu-latest
     steps:
@@ -25,14 +27,16 @@ jobs:
 
       - name: Add newly created issue to project
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Using a PAT stored as an organization secret is recommended for org projects.
+          # Ensure the secret ORG_PAT_PROJECTS exists in your tlon-team organization settings
+          # and the PAT has 'repo' (or 'public_repo') and 'project' scopes.
+          GH_TOKEN: ${{ secrets.ORG_PAT_PROJECTS }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
-          PROJECT_NUMBER: "9"
         run: |
           echo "Processing issue: $ISSUE_URL"
           echo "Adding to project (URL): ${{ env.PROJECT_URL }}"
-          echo "Project Number: $PROJECT_NUMBER"
+          echo "Project Number: ${{ env.PROJECT_NUMBER }}"
 
-          gh project item-add "$PROJECT_NUMBER" --owner "tlon-team" --url "$ISSUE_URL"
+          gh project item-add "${{ env.PROJECT_NUMBER }}" --owner "tlon-team" --url "$ISSUE_URL"
 
           echo "Issue successfully added to project."
