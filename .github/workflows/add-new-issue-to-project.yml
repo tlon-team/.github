@@ -1,24 +1,21 @@
 name: Add New Org Issues to Project
 
-# Trigger when an issue is opened in any repository within the organization
 on:
   issues:
     types: [opened]
 
-# Environment variables accessible in all jobs
 env:
   PROJECT_URL: "https://github.com/orgs/tlon-team/projects/9"
-  ORGANIZATION_NAME: "tlon-team" # Your organization's name
+  # ORGANIZATION_NAME: "tlon-team" # Not strictly needed if only used in the 'if'
 
 # Permissions for the GITHUB_TOKEN
-# The GITHUB_TOKEN needs permission to read issue data and write to organization projects.
 permissions:
-  issues: read    # To access github.event.issue.node_id
-  # projects: write # To add items to the project
+  issues: read                      # To access github.event.issue.html_url
+  organization-projects: write      # <--- CRITICAL CHANGE HERE: To read/write organization projects
 
 jobs:
   add_issue_to_project:
-    if: github.repository_owner == 'tlon-team'
+    if: github.repository_owner == 'tlon-team' # Ensure this matches your org name exactly
     runs-on: ubuntu-latest
     steps:
       - name: Install GitHub CLI (ensures it's available)
@@ -32,14 +29,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
-          # PROJECT_URL: ${{ env.PROJECT_URL }} # Still available if needed for echo
-          PROJECT_NUMBER: "9" # Explicitly define project number
+          PROJECT_NUMBER: "9"
         run: |
           echo "Processing issue: $ISSUE_URL"
-          echo "Adding to project (URL): ${{ env.PROJECT_URL }}" # Use the original env.PROJECT_URL for logging
+          echo "Adding to project (URL): ${{ env.PROJECT_URL }}" # Logging the full URL
           echo "Project Number: $PROJECT_NUMBER"
 
-          # Use the project number as the first argument
           gh project item-add "$PROJECT_NUMBER" --owner "tlon-team" --url "$ISSUE_URL"
 
           echo "Issue successfully added to project."
