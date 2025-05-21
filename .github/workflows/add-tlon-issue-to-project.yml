@@ -1,0 +1,31 @@
+name: Add New Tlon Issues to Project
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  add_issue_to_project:
+    name: Add issue to Tlon Org Project 9
+    # This condition ensures the workflow targets issues within the tlon-team organization.
+    if: github.repository_owner == 'tlon-team'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read    # Required to access issue details like node_id from the event payload.
+      projects: write # Required if using GITHUB_TOKEN to allow the action to add items to organization projects.
+                      # This permission might need to be enabled at the organization/repository settings for GITHUB_TOKEN.
+    steps:
+      - name: Add to project
+        # Uses the 'add-to-repo' action from the specified commit hash,
+        # which includes the logic to read 'content-id'.
+        uses: tlon-team/add-to-repo@76d3c36
+        with:
+          project-url: 'https://github.com/orgs/tlon-team/projects/9'
+          # The github-token for the action. 
+          # GITHUB_TOKEN will have the permissions defined in the 'permissions:' block above.
+          # For potentially greater reliability with org projects, consider using a PAT
+          # with 'project' and 'repo' scopes, stored as an organization secret.
+          # Example using a PAT: github-token: ${{ secrets.ORG_PAT_WITH_PROJECT_SCOPE }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Pass the node_id of the newly created issue to the action.
+          content-id: ${{ github.event.issue.node_id }}
