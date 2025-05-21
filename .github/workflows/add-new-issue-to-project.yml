@@ -14,7 +14,7 @@ env:
 # The GITHUB_TOKEN needs permission to read issue data and write to organization projects.
 permissions:
   issues: read    # To access github.event.issue.node_id
-  projects: write # To add items to the project
+  # projects: write # To add items to the project
 
 jobs:
   add_issue_to_project:
