@@ -18,28 +18,26 @@ permissions:
 
 jobs:
   add_issue_to_project:
-    # Only run this job if the issue was created in a repository belonging to your organization
     if: github.repository_owner == 'tlon-team'
     runs-on: ubuntu-latest
     steps:
       - name: Install GitHub CLI (ensures it's available)
         run: |
-          # This step is often optional as gh is pre-installed on GitHub-hosted runners,
-          # but it's good for explicit dependency management.
+          # Your existing gh install script
           type -p gh >/dev/null || (type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y) && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && sudo apt update && sudo apt install gh -y)
+          echo "GH CLI Version:"
+          gh --version # Good to log the version
 
       - name: Add newly created issue to project
         env:
-          # GITHUB_TOKEN is automatically provided by GitHub Actions
-          # Ensure its permissions are sufficient at the org level for projects.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NODE_ID: ${{ github.event.issue.node_id }} # Get the Node ID of the created issue
+          # ISSUE_NODE_ID: ${{ github.event.issue.node_id }} # Still fine to have, just not used by this command
+          ISSUE_URL: ${{ github.event.issue.html_url }} # Get the URL of the created issue
         run: |
-          echo "Processing issue: ${{ github.event.issue.html_url }}"
+          echo "Processing issue: $ISSUE_URL"
           echo "Adding to project: ${{ env.PROJECT_URL }}"
-          echo "Issue Node ID: $ISSUE_NODE_ID"
 
-          gh project item-add "${{ env.PROJECT_URL }}" --owner "${{ env.ORGANIZATION_NAME }}" --item-id "$ISSUE_NODE_ID"
+          # Use --url instead of --item-id
+          gh project item-add "${{ env.PROJECT_URL }}" --owner "tlon-team" --url "$ISSUE_URL"
 
           echo "Issue successfully added to project."
-
