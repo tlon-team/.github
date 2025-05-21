@@ -6,21 +6,19 @@ on:
 
 env:
   PROJECT_URL: "https://github.com/orgs/tlon-team/projects/9"
-  # ORGANIZATION_NAME: "tlon-team" # Not strictly needed if only used in the 'if'
 
 # Permissions for the GITHUB_TOKEN
 permissions:
-  issues: read                      # To access github.event.issue.html_url
-  organization-projects: write      # <--- CRITICAL CHANGE HERE: To read/write organization projects
+  issues: read
+  projects: write      # This is the syntactically correct scope
 
 jobs:
   add_issue_to_project:
-    if: github.repository_owner == 'tlon-team' # Ensure this matches your org name exactly
+    if: github.repository_owner == 'tlon-team'
     runs-on: ubuntu-latest
     steps:
       - name: Install GitHub CLI (ensures it's available)
         run: |
-          # Your existing gh install script
           type -p gh >/dev/null || (type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y) && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && sudo apt update && sudo apt install gh -y)
           echo "GH CLI Version:"
           gh --version
@@ -32,7 +30,7 @@ jobs:
           PROJECT_NUMBER: "9"
         run: |
           echo "Processing issue: $ISSUE_URL"
-          echo "Adding to project (URL): ${{ env.PROJECT_URL }}" # Logging the full URL
+          echo "Adding to project (URL): ${{ env.PROJECT_URL }}"
           echo "Project Number: $PROJECT_NUMBER"
 
           gh project item-add "$PROJECT_NUMBER" --owner "tlon-team" --url "$ISSUE_URL"
