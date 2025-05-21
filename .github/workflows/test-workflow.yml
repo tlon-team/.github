@@ -1,7 +1,6 @@
 on:
-  push: # Triggers on push to this .github repo
-    branches:
-      - main # Or your default branch
+  issues:
+    types: [opened]
 
 jobs:
   test_push_trigger:
