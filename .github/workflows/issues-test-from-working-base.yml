@@ -1,0 +1,11 @@
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  test_push_trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo message
+        run: echo "Workflow in .github repo triggered by push!"
+
